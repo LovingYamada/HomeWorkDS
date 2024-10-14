@@ -95,7 +95,15 @@ void SingleLinkedList<T>::insert(T _val)
 template <typename T>
 void SingleLinkedList<T>::remove()
 {
-    if (currentPos == nullptr || currentPos->next == nullptr)
+    if (currentPos == head)
+        {
+            delete head;
+            head = nullptr;
+            --size;
+            return;
+        }
+
+    else if (currentPos == nullptr || currentPos->next == nullptr)
         return;
     
     Node* toDelete = currentPos->next;

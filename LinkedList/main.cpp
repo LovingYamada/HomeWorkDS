@@ -22,7 +22,7 @@ c3.insert(8.8);
 c1.printList(); 
 c2.printList(); 
 c3.printList(); //测试【插入】操作是否正确，每种情况6分 
- e.remove(); 
+e.remove(); 
 c1.remove(); 
 bool f = c2.find(9.0); 
 c2.remove(); 
