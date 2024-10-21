@@ -1,0 +1,246 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{geometry, CJKutf8}
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+\setlength{\headheight}{12.64723pt}
+
+
+% useful packages.
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{enumerate}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{fancyhdr}
+\usepackage{layout}
+\usepackage{listings}
+\usepackage{float, caption}
+\usepackage{xcolor}
+
+\lstset{
+    basicstyle=\ttfamily, basewidth=0.5em,
+    language=C++,
+    keywordstyle=\color{blue},
+    stringstyle=\color{green},
+    commentstyle=\color{gray},
+    numbers=left,
+    numberstyle=\ttfamily\color{gray}\footnotesize,
+    stepnumber=1,
+    breaklines=true,
+    showstringspaces=false,
+    tabsize=4
+}
+
+% some common command
+\newcommand{\dif}{\mathrm{d}}
+\newcommand{\avg}[1]{\left\langle #1 \right\rangle}
+\newcommand{\difFrac}[2]{\frac{\dif #1}{\dif #2}}
+\newcommand{\pdfFrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\OFL}{\mathrm{OFL}}
+\newcommand{\UFL}{\mathrm{UFL}}
+\newcommand{\fl}{\mathrm{fl}}
+\newcommand{\op}{\odot}
+\newcommand{\Eabs}{E_{\mathrm{abs}}}
+\newcommand{\Erel}{E_{\mathrm{rel}}}
+
+\begin{document}
+
+\pagestyle{fancy}
+\fancyhead{}
+\lhead{吴慧阳  3230105143}
+\chead{数据结构与算法第四次作业}
+\rhead{\today}
+
+\section{测试程序的设计思路}
+在完成了\texttt{--}的设计后，我将\texttt{List.h}中的功能分为了如下几大类：\par
+\begin{itemize}
+    \item 创造消灭列表类\begin{itemize}
+        \item \texttt{List()}
+        \item \texttt{List(std::initializer\_list<Object> il)}
+        \item \texttt{List(const List \&rhs)}
+        \item \texttt{List \&operator=(List copy)}
+        \item \texttt{List(List \&\&rhs)}
+        \item \texttt{$\sim$List()}
+    \end{itemize}
+    \item 操作列表类\begin{itemize}
+        \item \texttt{push}
+        \item \texttt{pop}
+        \item \texttt{insert}
+        \item \texttt{erase}
+        \item \texttt{clear}
+    \end{itemize}
+    \item 输出列表及其特征类\begin{itemize}
+        \item \texttt{display}
+        \item \texttt{front}
+        \item \texttt{back}
+        \item \texttt{end}
+        \item \texttt{begin}
+        \item \texttt{size}
+        \item \texttt{empty}
+    \end{itemize}
+\end{itemize}
+其中，\texttt{display}是我为了更方便地检测功能而设计的一个函数，其功能
+是将\texttt{list\_}的全部数据顺序输出.
+其具体实现如下：\begin{lstlisting}
+    void display() const
+    {
+        if(empty())
+        {
+            std::cout << "Empty List." << std::endl;
+        }
+        else
+        {
+            for(auto it = begin() ; it != end() ; ++it)
+            {
+                std::cout << *it << " ";
+            }
+            std::cout << std::endl;
+        }
+    }
+\end{lstlisting}
+于是我使用了如下程序来测试这些函数：
+\begin{lstlisting}
+    
+#include "List.h"
+
+int main()
+{
+    List<int> intList;//constructor
+    
+    if(intList.empty()) std::cout << "Empty" << std::endl;
+    intList.push_back(520);
+    std::cout << "List size : " << intList.size() << std::endl;
+    if(!intList.empty()) std::cout << "Nonempty" << std::endl;
+    intList.push_back(1314);
+    std::cout << "List size : " << intList.size() << std::endl;
+    intList.display();
+    intList.push_front(1234);
+    intList.display();
+    int rval = 10;//push
+    intList.push_back(std::move(rval));
+    intList.push_front(std::move(rval));
+    intList.display();
+    intList.pop_back();//pop
+    intList.pop_front();
+    intList.display();
+
+    //insert begin end
+    auto it = intList.begin();
+    ++it;
+    auto it_2 = intList.insert(it, 15);
+    intList.display();
+    std::cout << "The node whose position coincides what insert returns has value : " << 
+    *it_2 << std::endl;
+    std::cout << "The iterator it now points to " << *it << std::endl;
+    it_2 = intList.end();
+    --it_2;
+    std::cout << "The iterator it_2 now points to " << *it_2 << std::endl;
+    //const begin end
+    List<int>::const_iterator it_3 = intList.begin();
+    std::cout << "The iterator it_3 points to " << *it_3 << std::endl;
+    it_3 = intList.end();
+    it_3--;
+    std::cout << "The iterator it_3 points to " << *it_3 << std::endl;
+    //rvalue
+    it_2 = intList.insert(it, std::move(rval));
+    intList.display(); 
+    std::cout << "The node whose position coincides what insert returns has value : " << 
+    *it_2 << std::endl;
+    std::cout << "The iterator it now points to " << *it << std::endl;
+
+    //erase
+    intList.erase(it);
+    intList.display();
+    it++;//++
+    it_2--;
+    --it_2;//--
+    std::cout << "it_2 now points to : " << *it_2 << std::endl
+    <<"it now points to : " << *it << std::endl;
+    intList.erase(it_2, it);
+    intList.display();
+    intList.push_front(520);
+    intList.clear();//clear
+    intList.display();
+    //constructor
+    std::cout << "intializer list : "; List<int>intList_1{1,2,3,4,5,6};
+    intList_1.display();
+    List<int>intList_2(intList_1);
+    std::cout << "copy : "; intList_2.display();
+    List<int>intList_3(std::move(intList_1));
+    std::cout << "move : "; intList_3.display();
+    intList_1.display();//move
+    //operator
+    intList = (intList_2);
+    intList.display();
+    //front back
+    std::cout << "Front : " << intList.front() << std::endl;
+    std::cout << "Back : " << intList.back() << std::endl;
+    const List<int> intList_const = intList;
+    intList_const.display();
+    std::cout << "Const front : " << intList_const.front() << std::endl;
+    std::cout << "Const back : " << intList_const.back() << std::endl;
+}
+\end{lstlisting}
+这个程序首先利用\texttt{List()}创建了\texttt{intList}
+并用\texttt{empty}
+检查其是否是空的\par
+之后我在\texttt{intList}中检验了各类
+\texttt{push}和\texttt{pop}的功能，
+同时还判断了\texttt{empty}在\texttt{intList}非空
+的时候是否能正确运行\par
+在完成了\texttt{push pop empty}的测试后，
+我开始测试\texttt{insert erase begin end}等与\texttt{iterator}有关的功能能否正常实现.\par
+在之后，我则对除默认构造函数外的构造函数进行了相应的测试.
+分别测试了以\texttt{initializer\_list}为参数的构造函数和拷贝构造函数
+、移动构造函数是否能正常初始化\texttt{List}.\par
+在剩余的代码中，我简单的对赋值运算符、\texttt{front}与\texttt{back}进行了相应的测试，
+结果均符合预期.
+\section{测试的结果}
+
+测试结果如下：\begin{lstlisting}
+Empty
+List size : 1
+Nonempty
+List size : 2
+520 1314 
+1234 520 1314 
+10 1234 520 1314 10 
+1234 520 1314 
+1234 15 520 1314 
+The node whose position coincides what insert returns has value : 15
+The iterator it now points to 520
+The iterator it_2 now points to 1314
+The iterator it_3 points to 1234
+The iterator it_3 points to 1314
+1234 15 10 520 1314 
+The node whose position coincides what insert returns has value : 10
+The iterator it now points to 520
+1234 15 10 1314 
+it_2 now points to : 1234
+it now points to : 1314
+1314 
+Empty List.
+intializer list : 1 2 3 4 5 6 
+copy : 1 2 3 4 5 6 
+move : 1 2 3 4 5 6 
+Empty List.
+1 2 3 4 5 6 
+Front : 1
+Back : 6
+1 2 3 4 5 6 
+Const front : 1
+Const back : 6
+\end{lstlisting}
+
+我用 valgrind 进行测试，发现没有发生内存泄露。
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
