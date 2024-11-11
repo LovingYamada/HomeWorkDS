@@ -1,0 +1,106 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{geometry, CJKutf8}
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+\setlength{\headheight}{12.64723pt}
+
+
+% useful packages.
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{enumerate}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{fancyhdr}
+\usepackage{layout}
+\usepackage{listings}
+\usepackage{float, caption}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+
+\lstset{
+    basicstyle=\ttfamily, basewidth=0.5em,
+    language=C++,
+    keywordstyle=\color{blue},
+    stringstyle=\color{green},
+    commentstyle=\color{gray},
+    numbers=left,
+    numberstyle=\ttfamily\color{gray}\footnotesize,
+    stepnumber=1,
+    breaklines=true,
+    showstringspaces=false,
+    tabsize=4
+}
+
+% some common command
+\newcommand{\dif}{\mathrm{d}}
+\newcommand{\avg}[1]{\left\langle #1 \right\rangle}
+\newcommand{\difFrac}[2]{\frac{\dif #1}{\dif #2}}
+\newcommand{\pdfFrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\OFL}{\mathrm{OFL}}
+\newcommand{\UFL}{\mathrm{UFL}}
+\newcommand{\fl}{\mathrm{fl}}
+\newcommand{\op}{\odot}
+\newcommand{\Eabs}{E_{\mathrm{abs}}}
+\newcommand{\Erel}{E_{\mathrm{rel}}}
+
+\begin{document}
+
+\pagestyle{fancy}
+\fancyhead{}
+\lhead{吴慧阳  3230105143}
+\chead{数据结构与算法第六次作业}
+\rhead{\today}
+
+\section{\texttt{remove}函数的实现思路}
+\texttt{remove}函数的实现几乎与BST中的\texttt{remove}函数相同，
+最大的区别是我们需要在删除后对\texttt{height}进行更新，以确保其可以正常地维持
+AVL树性质。
+重点在于我们需要在删除结点后，对结点高度进行更新，将被删除结点的亲代高度加上\texttt{1}。
+\begin{lstlisting}
+  void remove (const Comparable &x, BinaryNode *&t) 
+  {
+  if (t == nullptr) return;
+  if (x > t->element) remove(x, t->right);
+  else if (x < t->element) remove(x, t->left);
+  else
+      {
+      if (t->left == nullptr) 
+          {
+          BinaryNode *oldNode = t;
+          t = t->right;
+          delete oldNode;
+          }
+      else if (t->right == nullptr) 
+          {
+          BinaryNode *oldNode = t;
+          t = t->left;
+          delete oldNode;
+          }
+      else
+          {
+          BinaryNode *minNode = detachMin(t->right);
+          minNode->left = t->left;
+          minNode->right = t->right;
+          delete t;
+          t = minNode;
+          }
+      }
+      if (t != nullptr) {
+      t->height = std::max(height(t->left), height(t->right)) + 1;
+      balance(t);
+  }
+  }
+\end{lstlisting}
+如上所示。
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
