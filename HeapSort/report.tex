@@ -1,0 +1,136 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{geometry, CJKutf8}
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+\setlength{\headheight}{12.64723pt}
+
+
+% useful packages.
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{enumerate}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{fancyhdr}
+\usepackage{layout}
+\usepackage{listings}
+\usepackage{float, caption}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+
+\lstset{
+    basicstyle=\ttfamily, basewidth=0.5em,
+    language=C++,
+    keywordstyle=\color{blue},
+    stringstyle=\color{green},
+    commentstyle=\color{gray},
+    numbers=left,
+    numberstyle=\ttfamily\color{gray}\footnotesize,
+    stepnumber=1,
+    breaklines=true,
+    showstringspaces=false,
+    tabsize=4
+}
+
+% some common command
+\newcommand{\dif}{\mathrm{d}}
+\newcommand{\avg}[1]{\left\langle #1 \right\rangle}
+\newcommand{\difFrac}[2]{\frac{\dif #1}{\dif #2}}
+\newcommand{\pdfFrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\OFL}{\mathrm{OFL}}
+\newcommand{\UFL}{\mathrm{UFL}}
+\newcommand{\fl}{\mathrm{fl}}
+\newcommand{\op}{\odot}
+\newcommand{\Eabs}{E_{\mathrm{abs}}}
+\newcommand{\Erel}{E_{\mathrm{rel}}}
+
+\begin{document}
+
+\pagestyle{fancy}
+\fancyhead{}
+\lhead{吴慧阳  3230105143}
+\chead{数据结构与算法第七次作业}
+\rhead{\today}
+
+\section{\texttt{heapsort}函数的实现思路}
+    书中的\texttt{heapsort()}函数大体上分为两步，第一步为\texttt{buildHeap}，第二步为\texttt{deleteMax}。
+    这两步分别用于将序列构造为最大堆，并将堆顶元素调至序列末尾，同时维持堆的结构。\par
+    查询文档可知，在STL库中能实现此两功能的函数分别为\texttt{make\_heap}和\texttt{pop\_heap}。因此，我们只需要调用这两个函数即可实现\texttt{heapsort}。
+\section{\texttt{heapsort}函数的具体实现}
+    \begin{lstlisting}
+    template <typename T>
+    void heapSort(std::vector<T>& vec) {
+        std::make_heap(vec.begin(), vec.end());  
+        for (auto it = vec.end(); it != vec.begin(); --it) {
+            std::pop_heap(vec.begin(), it);
+        }
+    }
+    \end{lstlisting}
+\section{测试用函数说明及实现}
+    为了测试\texttt{heapsort}函数的正确性，我们需要\texttt{check}函数、用于生成测试数据的几个函数与记录时间的函数。
+    \texttt{check}函数实现如下：
+    \begin{lstlisting}
+template <typename T>
+bool check(const std::vector<T>& vec) {
+    for (size_t i = 1; i < vec.size(); ++i) {
+        if (vec[i] < vec[i - 1]) { 
+            return false;
+        }
+    }
+    return true;
+}
+\end{lstlisting}
+    至于生成随机数的函数，由于数据范围较大，\texttt{random()}函数无法满足要求，因此
+    在查询CSDN后，我们选择使用\texttt{random\_device}函数生成随机数种子，再使用\texttt{mt19937}生成随机数。
+    \begin{lstlisting}
+std::vector<int> generateRandomSequence(size_t size, int range = 1000000000) {
+    std::vector<int> vec(size);
+    std::random_device rd;                                 
+    std::mt19937 gen(rd());                                
+    std::uniform_int_distribution<int> dist(0, range - 1); 
+    std::generate(vec.begin(), vec.end(), [&]() {          
+        return dist(gen);
+    });
+    return vec;
+}
+    \end{lstlisting}
+其余测试数据的实现是简单的，此处略去。
+我们在实际测试时使用了\texttt{chrono}头文件中的\texttt{high\_resolution\_clock}来记录函数运行前后的时间差，考虑到时间
+复杂度，最后结果使用毫秒为单位输出，实现如下：
+\begin{lstlisting}
+    auto start = std::chrono::high_resolution_clock::now();
+        heapSort(vec1);
+        auto end = std::chrono::high_resolution_clock::now();
+        auto customTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+\end{lstlisting}
+\section{测试流程}
+我们先创建了两个vector，分别命名为\texttt{vec1}和\texttt{vec2}，然后分别调用\texttt{generateRandomSequence}函数生成随机数
+，然后对其进行了两次测试：一次使用我们创建的\texttt{heapsort}，并调用\texttt{check}函数检查排序结果是否正确；
+一次使用STL库中的\texttt{heapsort}。最后输出时间。
+\section{测试结果}
+进行了10次测试后，我们取平均运行时间得到下表：
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{l|r|r}
+    \hline
+     & my heapsort time & STL heapsort time  \\ \hline
+    random sequence & 179.6ms & 173.2ms  \\ \hline
+    ordered sequence & 76.0ms & 64.0ms  \\ \hline
+    reversed sequence & 84.6ms & 68.4ms  \\ \hline
+    repetitive sequence & 158.0ms & 151.2ms  \\ \hline
+    \end{tabular}
+    \caption{results}
+    \end{table}
+\section{结论}
+    我们发现，我们实现的\texttt{heapsort}函数运行时间略长于STL库中的\texttt{heapsort}函数。
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
