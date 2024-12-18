@@ -64,8 +64,11 @@ bool isValidExpression(const string& expr) {
             if (i > 1 && isOperator(expr[i-1]) && isOperator(expr[i-2])) return false; // 1---1不合法
             if (i > 0 && expr[i] != '-' && expr[i-1] == '(') return false; // (+1)不合法
             if (i > 0 && expr[i-1] == '(' && expr[i+1] == ')') return false; // (-)不合法
+            if (expr[i+1] == ')') return false; // (1+)不合法
         }
         if (expr[i] == ' ') return false; // 不允许空格
+        if (i > 0 && expr[i] == '(' && (!isOperator(expr[i-1]) && expr[i-1] != '(')) return false; // )( 不合法 +(  ((
+        if (i < expr.size()-1 && expr[i] == ')' && (!isOperator(expr[i+1]) && expr[i+1] != ')')) return false; 
     }
     return openParenCount == 0;
 }
@@ -178,7 +181,75 @@ double evaluateExpression(const string& expr) {
     return values.top();
 }
 
+void runTests() {
+    // Test cases
+    std::string testCases[] = {
+        //四则运算
+        "1+2", "2-3", "3*4", "6/3", "6/0", "0/0",
+        //四则运算复合
+        "1+2*3", "1*2+3", "1*2/3", "1/2*3", "1/2+3", "1+2/3", "1-2*3", "1*2-3",
+        "1-2/3", "1/2-3", "1+2-3", "1-2+3", "1+2+3", "1-2-3", "1*2*3", "1/2/3",
+        //负数加减与运算符连用
+        "1+-2", "1--2", "1*-2", "1/-2", "1**2", "1//2", "1++2",
+        "-1+2", "-1-2", "-1*2", "-1/2", "-1**2", "-1//2", "-1++2",
+        "1+++2", "1---2", "1***2", "1///2", "1++++2", "1----2", "1****2", "1////2",
+        //负数的四则运算复合
+        "-1+-2*3", "-1*-2+3", "-1*-2/3", "-1/-2*3", "-1/-2+3", "-1+-2/3", "-1--2*3", "-1*-2-3",
+        "-1--2/3", "-1/-2-3", "-1+-2-3", "-1--2+3", "-1+-2+3", "-1--2-3", "-1*-2*3", "-1/-2/3",
+        "1+-2*3", "1*-2+3", "1*-2/3", "1/-2*3", "1/-2+3", "1+-2/3", "1--2*3", "1*-2-3",
+        "1--2/3", "1/-2-3", "1+-2-3", "1--2+3", "1+-2+3", "1--2-3", "1*-2*3", "1/-2/3",
+        //小数参与运算   
+        "1.2+3.4", "1.2-3.4", "1.2*3.4", "1.2/3.4", "1.2/0.0",
+        "1.5+2.5", "1.5-2.5", "1.5*2.5", "1.5/2.5", "1.0+0.2",
+        "1.1.1", "1.1.1+2.2.2", "1.1.1-2.2.2", "1.1.1*2.2.2", "1.1.1/2.2.2",
+        ".1+2.5", ".1-2.5", ".1*2.5", ".1/2.5", ".1/0.0",
+        //科学计数法
+        "2e-1", "1.5e2+3", "-3.2e+1",
+        "1.5e+2", "1.5e-2", "-1.5e2+2",
+        "1.5e2*-2", "1.5e-2/2", "1.5e0",
+        "1.2e-3/0.0", "-1.2e-3+2", "-1.2e-3-2",
+        "1.2ee1", "1.2e1e1", "1.1e1.2", "e1"
+        //括号
+        "(1+2)", "(1+2)*3", "1+(2*3)", "1+2*3", "1+2*(3-4)", "(1+2)*(3-4)", "(1+2)*(3-4)/2", "(1+2)*(3-4)/2+5",
+        "((1+2)*(3-4))/2+5", "((1+2)*(3-4))/2+5*6", "((1+2)*(3-4))/2+5*6/7", "((1+2)*(3-4))/2+5*6/7+8",
+        "1+(2*(3-4)", "(1+(2*(3-4))", "1+(2*3(", "1+)", "(1+2))", "()",
+        "(1+3)(4-2)", "(-1)", "(+1)", "(+)", "(1+)", ")(", "()()",
+        //其他非法
+        "", "1+", "+1", "1+*2", "1/0/0", "1..2+3", "1.2.3+4", "1e+2+3", "1ee2+3", "(1+2)3",
+        "(1-)", "(1*)", "(1/)", "((()))", "((((1+2))))",
+        "1    +     1 ", "1412edwqf2342ewd"
+        "11411 edews"
+    };
+
+    for (const std::string& expr : testCases) {
+        try {
+            if (!isValidExpression(expr)) {
+                std::cout << expr << " ILLGAL" << std::endl;
+                continue;
+            }
+
+            double result = evaluateExpression(expr);
+
+            if (result == 0) {
+                std::cout << expr << "=0.00000" << std::endl;
+            } else {
+                std::cout << expr << "=" << result << std::endl;
+            }
+        } catch (const std::exception& e) {
+            std::cout << expr << " ILLGAL" << std::endl;
+        }
+    }
+}
+
 int main() {
+    int c = 1;
+    cout << "Please select a mode:" << endl;
+    cout << "1. Test mode" << endl;
+    cout << "2. Interactive mode" << endl;
+    cin >> c;
+    cin.ignore();
+    if(c == 1) runTests();
+    else if(c == 2){
     int n = 1;
     while (n){
     string expr;
@@ -197,12 +268,10 @@ int main() {
         // 输出结果，保留 5 位小数
         if(result == 0) printf("0.00000\n");
         else printf("%.5f\n", result);
-    } catch (const runtime_error& e) {
-        cout << "ILLEGAL" << endl;
-    } catch (const invalid_argument& e) {
+    } catch (const std::exception& e) {
         cout << "ILLEGAL" << endl;
     }
-
     }
+    } else cout << "Invalid input" << endl;
     return 0;
 }
