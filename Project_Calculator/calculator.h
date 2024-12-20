@@ -68,7 +68,8 @@ bool isValidExpression(const string& expr) {
         }
         if (expr[i] == ' ') return false; // 不允许空格
         if (i > 0 && expr[i] == '(' && (!isOperator(expr[i-1]) && expr[i-1] != '(')) return false; // )( 不合法 +(  ((
-        if (i < expr.size()-1 && expr[i] == ')' && (!isOperator(expr[i+1]) && expr[i+1] != ')')) return false; 
+        if (i < expr.size() - 1 && expr[i] == ')' && (!isOperator(expr[i+1]) && expr[i+1] != ')')) return false; 
+        if (i < expr.size() - 1 && (expr[i] == 'e' || expr[i] == 'E') && (!isdigit(expr[i+1]) && expr[i+1] != '-')) return false; // 1e+ 不合法 1e-1 合法
     }
     return openParenCount == 0;
 }
@@ -97,7 +98,7 @@ double StringToNumber(const std::string& expr, size_t& i) {
     try {
         return std::stod(num); // 转换为 double
     } catch (const std::exception& e) {
-        throw std::invalid_argument("Invalid number format: " + num);
+        throw std::invalid_argument("Invalid number format");
     }
 }
 
@@ -204,21 +205,24 @@ void runTests() {
         "1.1.1", "1.1.1+2.2.2", "1.1.1-2.2.2", "1.1.1*2.2.2", "1.1.1/2.2.2",
         ".1+2.5", ".1-2.5", ".1*2.5", ".1/2.5", ".1/0.0",
         //科学计数法
-        "2e-1", "1.5e2+3", "-3.2e+1",
+        "2e-1", "1.5e2+3", "-3.2e+1", "-3.2e*1", "-3.2e/1", "-3.2e-1",
         "1.5e+2", "1.5e-2", "-1.5e2+2",
         "1.5e2*-2", "1.5e-2/2", "1.5e0",
         "1.2e-3/0.0", "-1.2e-3+2", "-1.2e-3-2",
-        "1.2ee1", "1.2e1e1", "1.1e1.2", "e1"
+        "1.2ee1", "1.2e1e1", "1.1e1.2", "e1","1-2e-2+3",
+        "1-2e+3","1-2e-3","1-2e3"
         //括号
         "(1+2)", "(1+2)*3", "1+(2*3)", "1+2*3", "1+2*(3-4)", "(1+2)*(3-4)", "(1+2)*(3-4)/2", "(1+2)*(3-4)/2+5",
         "((1+2)*(3-4))/2+5", "((1+2)*(3-4))/2+5*6", "((1+2)*(3-4))/2+5*6/7", "((1+2)*(3-4))/2+5*6/7+8",
         "1+(2*(3-4)", "(1+(2*(3-4))", "1+(2*3(", "1+)", "(1+2))", "()",
         "(1+3)(4-2)", "(-1)", "(+1)", "(+)", "(1+)", ")(", "()()",
+        "(1e2)*(2e3)", "(1e2)+(2e3)", "(1e2)-(2e3)", "(1e2)/(2e3)",
+        "(1ee)*(2e3)", "(1e2)*(2ee3)", "((1e2)*(2e3))", "((1e2)*(2e3)))))",
         //其他非法
         "", "1+", "+1", "1+*2", "1/0/0", "1..2+3", "1.2.3+4", "1e+2+3", "1ee2+3", "(1+2)3",
         "(1-)", "(1*)", "(1/)", "((()))", "((((1+2))))",
-        "1    +     1 ", "1412edwqf2342ewd"
-        "11411 edews"
+        "1    +     1 ", "1412edwqf2342ewd",
+        "11411 edews", "+121+12123", "-1+1231", "*1231+123", "/1231+123", "--1+2"
     };
 
     for (const std::string& expr : testCases) {
@@ -239,39 +243,4 @@ void runTests() {
             std::cout << expr << " ILLGAL" << std::endl;
         }
     }
-}
-
-int main() {
-    int c = 1;
-    cout << "Please select a mode:" << endl;
-    cout << "1. Test mode" << endl;
-    cout << "2. Interactive mode" << endl;
-    cin >> c;
-    cin.ignore();
-    if(c == 1) runTests();
-    else if(c == 2){
-    int n = 1;
-    while (n){
-    string expr;
-    cout << "Enter a mathematical expression to evaluate, or type 's' to exit" << endl
-         << "Do NOT use spaces in the expression." << endl;
-    getline(cin, expr);
-
-    if (expr == "s") {break;}
-    if (!isValidExpression(expr)) {
-        cout << "ILLEGAL" << endl;
-        continue;
-    }
-
-    try {
-        double result = evaluateExpression(expr);
-        // 输出结果，保留 5 位小数
-        if(result == 0) printf("0.00000\n");
-        else printf("%.5f\n", result);
-    } catch (const std::exception& e) {
-        cout << "ILLEGAL" << endl;
-    }
-    }
-    } else cout << "Invalid input" << endl;
-    return 0;
 }

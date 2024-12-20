@@ -1,0 +1,149 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{geometry, CJKutf8}
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+\setlength{\headheight}{12.64723pt}
+
+
+% useful packages.
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{enumerate}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{fancyhdr}
+\usepackage{layout}
+\usepackage{listings}
+\usepackage{float, caption}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+
+\lstset{
+    basicstyle=\ttfamily, basewidth=0.5em,
+    language=C++,
+    keywordstyle=\color{blue},
+    stringstyle=\color{green},
+    commentstyle=\color{gray},
+    numbers=left,
+    numberstyle=\ttfamily\color{gray}\footnotesize,
+    stepnumber=1,
+    breaklines=true,
+    showstringspaces=false,
+    tabsize=4
+}
+
+% some common command
+\newcommand{\dif}{\mathrm{d}}
+\newcommand{\avg}[1]{\left\langle #1 \right\rangle}
+\newcommand{\difFrac}[2]{\frac{\dif #1}{\dif #2}}
+\newcommand{\pdfFrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\OFL}{\mathrm{OFL}}
+\newcommand{\UFL}{\mathrm{UFL}}
+\newcommand{\fl}{\mathrm{fl}}
+\newcommand{\op}{\odot}
+\newcommand{\Eabs}{E_{\mathrm{abs}}}
+\newcommand{\Erel}{E_{\mathrm{rel}}}
+
+\begin{document}
+
+\pagestyle{fancy}
+\fancyhead{}
+\lhead{吴慧阳  3230105143}
+\chead{数据结构与算法项目作业 计算器}
+\rhead{\today}
+
+\section{设计思路}
+\subsection{基本思路}
+\begin{itemize}
+    \item 使用栈来存储数字和运算符。
+    \item 遇到数字时，将其压入数字栈。
+    \item 遇到运算符时：
+    \begin{itemize}
+        \item 如果运算符栈为空，或者运算符栈顶为左括号，则直接压入运算符栈。
+        \item 如果运算符栈顶为右括号，则将运算符栈中的运算符依次弹出并计算，直到遇到左括号。
+        \item 若为其他运算符，则比较当前运算符与栈顶运算符的优先级。若当前优先级较低，则先弹出栈顶运算符并计算，再将当前运算符压入。
+    \end{itemize}
+    \item 遍历表达式结束后，将栈中剩余的运算符依次弹出并计算。
+\end{itemize}
+
+\subsection{优先级规则}
+\begin{itemize}
+    \item 运算符优先级从高到低依次为：括号、乘除、加减。
+    \item 左括号的优先级最低，用于标记优先计算范围。
+\end{itemize}
+
+\section{程序实现}
+\subsection{数据结构设计}
+\begin{itemize}
+    \item \textbf{数字栈：} 用于存储操作数。
+    \item \textbf{运算符栈：} 用于存储运算符和括号。
+\end{itemize}
+
+\subsection{算法步骤}
+\begin{enumerate}
+    \item 初始化两个栈：数字栈和运算符栈。
+    \item 从左到右扫描表达式中的字符：
+    \begin{itemize}
+        \item 如果是数字，将其压入数字栈。
+        \item 如果是左括号或运算符，将其压入运算符栈。
+        \item 如果是右括号：
+        \begin{itemize}
+            \item 弹出运算符栈顶的运算符，并从数字栈弹出对应的操作数进行计算。
+            \item 将计算结果压入数字栈，直到遇到左括号。
+        \end{itemize}
+        \item 如果是运算符：
+        \begin{itemize}
+            \item 比较当前运算符与栈顶运算符的优先级。
+            \item 若当前运算符优先级较低，则弹出栈顶运算符并计算，重复此过程，直至满足条件后将当前运算符压入。
+        \end{itemize}
+    \end{itemize}
+    \item 扫描完成后，依次弹出运算符栈中的运算符进行计算，直到栈为空。
+\end{enumerate}
+\subsection{字符串转数字}
+解析字符串为数字是表达式求值的核心操作之一。
+C++ 标准库中的 \texttt{std::stod} 函数提供了高效且可靠的解决方案，其特点如下：
+
+\begin{enumerate}
+    \item \textbf{功能全面}：\texttt{std::stod} 支持解析常见的数字格式，包括：
+    \begin{itemize}
+        \item 整数和小数（例如 \texttt{"123"} 或 \texttt{"123.45"}）。
+        \item 负数（例如 \texttt{"-123"} 或 \texttt{"-123.45"}）。
+        \item 科学计数法（例如 \texttt{"1.23e4"}）。
+    \end{itemize}
+    \item \textbf{错误处理}：\texttt{std::stod} 可以处理并报告解析过程中可能出现的错误，例如：
+    \begin{itemize}
+        \item 非法字符（例如 \texttt{"abc"}）。
+        \item 无效的数字格式（例如 \texttt{"123.45.67"}）。
+\end{enumerate}
+
+\subsection{代码实现}
+\begin{lstlisting}
+    
+\end{lstlisting}
+\section{测试与结果}
+\subsection{测试用例}
+\begin{itemize}
+    \item 测试表达式1：$3 + 5 \times 2 - ( 6 / 3 )$
+    \item 测试表达式2：$( 2 + 3 ) \times ( 5 - 2 )$
+    \item 测试表达式3：$4 \times ( 6 + 2 ) / 8$
+\end{itemize}
+
+\subsection{运行结果}
+\begin{itemize}
+    \item 表达式1结果：$10$
+    \item 表达式2结果：$15$
+    \item 表达式3结果：$4$
+\end{itemize}
+
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
