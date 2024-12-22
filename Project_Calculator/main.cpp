@@ -25,7 +25,7 @@ int main() {
     try {
         double result = evaluateExpression(expr);
         // 输出结果，保留 5 位小数
-        if(result == 0) printf("0.00000\n");
+        if(result == 0) printf("0\n");
         else printf("%.5f\n", result);
     } catch (const std::exception& e) {
         cout << "ILLEGAL" << endl;

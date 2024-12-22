@@ -235,7 +235,7 @@ void runTests() {
             double result = evaluateExpression(expr);
 
             if (result == 0) {
-                std::cout << expr << "=0.00000" << std::endl;
+                std::cout << expr << "=0" << std::endl;
             } else {
                 std::cout << expr << "=" << result << std::endl;
             }
