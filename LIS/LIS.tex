@@ -1,0 +1,177 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{geometry, CJKutf8}
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+\setlength{\headheight}{12.64723pt}
+
+
+% useful packages.
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{ctex}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{enumerate}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{fancyhdr}
+\usepackage{layout}
+\usepackage{listings}
+\usepackage{float, caption}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+
+\lstset{
+    basicstyle=\ttfamily, basewidth=0.5em,
+    language=C++,
+    keywordstyle=\color{blue},
+    stringstyle=\color{green},
+    commentstyle=\color{gray},
+    numbers=left,
+    numberstyle=\ttfamily\color{gray}\footnotesize,
+    stepnumber=1,
+    breaklines=true,
+    showstringspaces=false,
+    tabsize=4
+}
+
+% some common command
+\newcommand{\dif}{\mathrm{d}}
+\newcommand{\avg}[1]{\left\langle #1 \right\rangle}
+\newcommand{\difFrac}[2]{\frac{\dif #1}{\dif #2}}
+\newcommand{\pdfFrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\OFL}{\mathrm{OFL}}
+\newcommand{\UFL}{\mathrm{UFL}}
+\newcommand{\fl}{\mathrm{fl}}
+\newcommand{\op}{\odot}
+\newcommand{\Eabs}{E_{\mathrm{abs}}}
+\newcommand{\Erel}{E_{\mathrm{rel}}}
+
+\begin{document}
+
+\pagestyle{fancy}
+\fancyhead{}
+\lhead{吴慧阳  3230105143}
+\chead{第八次作业}
+\rhead{\today}
+
+\section{问题描述}
+给定一个整数序列，找到其中的最长严格递增子序列（LIS）的长度。
+
+\section{动态规划算法（时间复杂度 O($n^2$)）}
+我们可以使用动态规划方法来解决这个问题。定义一个数组 \( dp \)，其中 \( dp[i] \) 表示以第 \( i \) 个元素结尾的最长严格递增子序列的长度。
+\par 设输入数组为 \( nums \)。
+显然状态转移方程为$$    
+    dp[i] = max(dp[i], dp[j] + 1) \quad \text{其中} \quad 0 \leq j < i \quad \text{且} \quad nums[j] < nums[i]$$
+\subsection{算法描述}
+\begin{itemize}
+    \item 初始化一个长度为 \( n \) 的数组 \( dp \)，使得 \( dp[i] = 1 \)（因为每个元素本身至少能形成一个长度为1的子序列）。
+    \item 对于每个索引 \( i \) 从 1 到 \( n-1 \)，检查所有比它小的索引 \( j \)（即 \( 0 \leq j < i \)）：
+    \begin{itemize}
+        \item 如果 \( nums[j] < nums[i] \)，说明 \( nums[i] \) 可以接在以 \( nums[j] \) 结尾的子序列后面。更新 \( dp[i] = \max(dp[i], dp[j] + 1) \)。
+    \end{itemize}
+    \item 最终 LIS 的长度是 \( dp \) 数组中的最大值：\( \max(dp) \)。
+\end{itemize}
+
+\subsection{O($n^2$) 算法伪代码}
+\begin{algorithm}
+\caption{最长严格递增子序列（O($n^2$))}
+\begin{algorithmic}[1]
+\STATE \textbf{输入:} 整数数组 \( nums \)
+\STATE \( n \gets \text{nums的长度} \)
+\STATE \( dp \gets \text{大小为n的数组，初始化为1} \)
+\FOR{ \( i = 1 \text{ 到 } n-1 \)}
+    \FOR{ \( j = 0 \text{ 到 } i-1 \)}
+        \IF{ \( nums[j] < nums[i] \)}
+            \STATE \( dp[i] \gets \max(dp[i], dp[j] + 1) \)
+        \ENDIF
+    \ENDFOR
+\ENDFOR
+\STATE \textbf{输出:} \( \max(dp) \)
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{示例:}
+考虑输入序列：\( [10, 22, 9, 33, 21, 50, 41, 60] \)。
+
+\begin{itemize}
+    \item 初始化 \( dp = [1, 1, 1, 1, 1, 1, 1, 1] \)。
+    \item 对于 \( i = 1 \)，更新 \( dp = [1, 2, 1, 1, 1, 1, 1, 1] \) 因为 \( 22 > 10 \)。
+    \item 对于 \( i = 2 \)，没有更新，\( dp = [1, 2, 1, 1, 1, 1, 1, 1] \)。
+    \item 对于 \( i = 3 \)，更新 \( dp = [1, 2, 1, 3, 1, 1, 1, 1] \) 因为 \( 33 > 10, 33 > 22 \)。
+    \item 按此类推，直到最后。
+    \item 最终 \( dp = [1, 2, 1, 3, 2, 4, 4, 5] \)，LIS 长度为 5。
+\end{itemize}
+
+\section{动态规划加二分法算法（时间复杂度 O($n \log n$)）}
+
+我们可以使用二分法对动态规划进行优化，使时间复杂度变为 \( O(n \log n) \)。
+优化的关键在于将原动态规划方法的\( dp \)概念进行优化。
+我们选择用\( dp[i] \)存储长度为k的递增子序列
+的最末元素，若有多个长度为k的递增子序列，则记录
+最小的那个。
+\subsection{算法描述}
+\begin{itemize}
+    \item 初始化一个数组 \( dp \)，用于存储最小的严格递增子序列结尾元素，\( dp[0] \)为 \(num[0] \)。
+    \item 对于每个元素 \( x \)：
+    \begin{itemize}
+        \item 使用二分查找找到 \( dp \) 中第一个大于或等于 \( x \) 的位置。
+        \item 如果该位置是数组末尾，说明 \( x \) 可以扩展最长递增子序列；否则，用 \( x \) 替换该位置的元素。
+    \end{itemize}
+    \item 最终，\( dp \) 数组的长度即为最长严格递增子序列的长度。
+\end{itemize}
+
+\subsection{算法伪代码}
+\begin{algorithm}
+\caption{最长严格递增子序列（O($n \log n$)) 算法}
+\begin{algorithmic}[1]
+\STATE \textbf{输入:} 整数数组 \( nums \)
+\STATE 初始化 \( dp \) 为一个空数组，\( dp[0] \) 为 \( nums[0] \)
+\FOR{每个元素 \( x \) 在 \( nums \) 中}
+    \STATE 使用二分查找找到 \( dp \) 中第一个大于或等于 \( x \) 的位置，记为 \( pos \)
+    \IF{ \( pos == \text{dp的长度} \)}
+        \STATE 将 \( x \) 添加到 \( dp \) 的末尾
+    \ELSE
+        \STATE 将 \( dp[pos] \) 替换为 \( x \)
+    \ENDIF
+\ENDFOR
+\STATE \textbf{输出:} \( \text{dp的长度} \)
+\end{algorithmic}
+\end{algorithm}
+\subsection{示例:}
+假设输入序列为：
+\([9, 2, 1, 5, 3, 6, 4, 8, 9, 7]\)
+
+执行过程如下：
+
+\begin{itemize}
+    \item 初始时，令 \( dp[0] = 2 \)， \( len = 1 \)。
+    \item 处理 \( num[1] = 1 \)，将 \( dp[0] = 1 \)， \( len = 1 \)。
+    \item 处理 \( num[2] = 5 \)，因为 \( 5 > dp[0] \)，所以 \( dp[1] = 5 \)， \( len = 2 \)。
+    \item 处理 \( num[3] = 3 \)，使用二分查找找到替换位置，\( dp[1] = 3 \)， \( len = 2 \)。
+    \item 处理 \( num[4] = 6 \)，因为 \( 6 > dp[1] \)，所以 \( dp[2] = 6 \)， \( len = 3 \)。
+    \item 处理 \( num[5] = 4 \)，使用二分查找找到替换位置，\( dp[2] = 4 \)， \( len = 3 \)。
+    \item 处理 \( num[6] = 8 \)，因为 \( 8 > dp[2] \)，所以 \( dp[3] = 8 \)， \( len = 4 \)。
+    \item 处理 \( num[7] = 9 \)，因为 \( 9 > dp[3] \)，所以 \( dp[4] = 9 \)， \( len = 5 \)。
+    \item 处理 \( num[8] = 7 \)，使用二分查找找到替换位置，\( dp[3] = 7 \)， \( len = 5 \)。
+\end{itemize}
+
+最终，最长递增子序列的长度为 5。
+
+\section{总结}
+本文提供了两种解决最长严格递增子序列（LIS）问题的算法。第一种算法使用动态规划，时间复杂度为 \( O(n^2) \)，第二种算法使用二分查找，优化了时间复杂度为 \( O(n \log n) \)。
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
